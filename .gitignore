@@ -1,0 +1,13 @@
+# Secrets & runtime data — never commit these
+.env
+data/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
