@@ -1,0 +1,54 @@
+# ─────────────────────────────────────────────────────────────
+#  Automatiq price watcher — configuration
+#  Copy this file to "config.yaml" and edit it. config.yaml is yours
+#  to change anytime (events, thresholds, channels) without touching
+#  any code. Lines starting with # are comments.
+# ─────────────────────────────────────────────────────────────
+
+# Where price data comes from:
+#   mock       -> generated sample data, no token needed (great for a first run)
+#   automatiq  -> the real Automatiq API (needs AUTOMATIQ_API_TOKEN in .env)
+source: mock
+
+# How often to poll when running in --watch mode, in seconds. 300 = every 5 min.
+poll_interval_seconds: 300
+
+# Folder where price history + alert logs are written (created automatically).
+data_dir: data
+
+# ── Automatiq API connection (only used when source: automatiq) ──
+#   These are filled in / confirmed against the live API during setup.
+#   Until then they are placeholders and mock mode ignores them entirely.
+automatiq:
+  base_url: https://app.sync.automatiq.com
+  listings_endpoint: "/api/PLACEHOLDER"   # confirmed via live inspection
+  auth_scheme: bearer          # how the token is sent: bearer | token | header | query
+  auth_header: Authorization   # header (or query-param) name that carries the token
+  token_env: AUTOMATIQ_API_TOKEN
+
+# ── What to watch ──  (add as many "- name:" blocks as you like)
+watches:
+  - name: "Example event / Sec 104"
+    event_id: "REPLACE_ME"            # Automatiq event id
+    event_name: "Team X vs Team Y"    # free-text label used in alerts
+    filters:
+      sections: ["104", "105"]        # empty [] = all sections
+      rows: []                        # empty [] = all rows
+      tiers: []                       # empty [] = all tiers / zones
+      max_quantity: null              # e.g. 2 = only count listings that sell >=2 together; null = ignore
+    thresholds:
+      absolute_below: 150.00          # alert when the lowest price <= this ($). null = disabled
+      relative_drop_pct: 10           # alert on a drop of >= this % vs the last check. null = disabled
+    cooldown_seconds: 3600            # minimum gap (s) between repeat alerts for this watch
+
+# ── Alerting ──
+alerts:
+  channels: [log]                     # any of: log, slack, email  (log needs no setup and is always safe)
+  slack_webhook_env: SLACK_WEBHOOK_URL
+  email:
+    smtp_host_env: SMTP_HOST
+    smtp_port_env: SMTP_PORT
+    smtp_user_env: SMTP_USERNAME
+    smtp_pass_env: SMTP_PASSWORD
+    from_env: ALERT_EMAIL_FROM
+    to_env: ALERT_EMAIL_TO
